@@ -1,2 +1,4 @@
-/.digiadb.brd.lck
-/.digiadb.sch.lck
+/.*.lck
+/.*.lck
+*.b#*
+*.s#*
