@@ -49,6 +49,17 @@
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 
+// Swaps Right Ctrl and Caps Lock around
+// If you want to use it, alse modify the locking switch physically as described here:
+// http://zacbir.net/blog/2014/12/19/getting-control-over-caps-lock/
+#define CAPS_TO_CTRL
+#ifdef CAPS_TO_CTRL
+  #define CAPS_PHY 228
+  #define CTRL_RIGHT_PHY 57
+#else
+  #define CAPS_PHY 57
+  #define CTRL_RIGHT_PHY 228
+#endif
 
 // Pin # of ADB signal
 #define ADB 2
@@ -82,7 +93,8 @@ PROGMEM static const uint8_t adb2usb[] {
 27, // x 0x07
 6, // c 0x08
 25, // v 0x09
-0xff, // 0x0a
+100, // § section sign on intl 0x0a
+    // (physically where grave is on US)
 5, // b 0x0b
 20, // q 0x0c
 26, // w 0x0d
@@ -122,14 +134,14 @@ PROGMEM static const uint8_t adb2usb[] {
 55, // . 0x2f
 43, // tab 0x30
 44, // space 0x31
-53, // ` 0x32
+53, // ` grave 0x32
 42, // backspace 0x33
 0xff, // 0x34
 41, // esc 0x35
 224, // left control 0x36
 227, // left cmd 0x37
 225, // left shift 0x38
-57, // capslock 0x39
+CAPS_PHY, // capslock/right ctrl 0x39
 226, // left opt 0x3a
 80, // left 0x3b
 79, // right 0x3c
@@ -197,7 +209,7 @@ PROGMEM static const uint8_t adb2usb[] {
 58, // f1 0x7a
 229, // right shift 0x7b
 230, // right alt/opt 0x7c
-228, // right control 0x7d
+CTRL_RIGHT_PHY, // right control 0x7d
 };
 
 #define ADB2USB_LAST 0x7d
@@ -435,11 +447,14 @@ static inline void ADBUSBKeyUpDown(uint16_t state, uint8_t key) {
     if (key == 0xff) return;
     
     if (state) {
+#ifndef CAPS_TO_CTRL
       if(key == KEY_CAPS) {
         ADBUSBKeyDown(KEY_CAPS);
       } else {
         ADBUSBKeyUp(key);
       }
+#endif
+      ADBUSBKeyUp(key);
     } else {
       ADBUSBKeyDown(key);
     }
@@ -548,6 +563,7 @@ void ADBSendKey(uint16_t adbkeys) {
 
   ADBUSBSend(ADBUSB_KEYBOARD);
 
+#ifndef CAPS_TO_CTRL
   // With ADB keyboards, the capslock key is mechanically 
   // locked in place, so the state is physical.
   // With USB keyboards, the capslock state is managed
@@ -561,6 +577,7 @@ void ADBSendKey(uint16_t adbkeys) {
       break;
     }
   }
+#endif
 }
 
 void ADBSendMouse(uint16_t data) {
