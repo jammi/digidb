@@ -37,7 +37,9 @@
 //
 // Rob Braun <bbraun@synack.net> 2016
 
-#include "usbdrv.h"
+extern "C" {
+  #include "usbdrv.h"
+}
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
