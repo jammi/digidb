@@ -5,7 +5,6 @@
  * Tabsize: 4
  * Copyright: (c) 2008 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt), GNU GPL v3 or proprietary (CommercialLicense.txt)
- * This Revision: $Id: usbportability.h 740 2009-04-13 18:23:31Z cs $
  */
 
 /*
@@ -31,7 +30,7 @@ Thanks to Oleg Semyonov for his help with the IAR tools port!
 /* ------------------------------------------------------------------------- */
 
 #ifndef ENABLE_BIT_DEFINITIONS
-#   define ENABLE_BIT_DEFINITIONS       1   /* Enable bit definitions */
+#   define ENABLE_BIT_DEFINITIONS	1   /* Enable bit definitions */
 #endif
 
 /* Include IAR headers */
@@ -125,7 +124,11 @@ static inline void  sei(void)
 #   include <avr/pgmspace.h>
 #endif
 
-#define USB_READ_FLASH(addr)    pgm_read_byte(addr)
+#if USB_CFG_DRIVER_FLASH_PAGE
+#   define USB_READ_FLASH(addr)    pgm_read_byte_far(((long)USB_CFG_DRIVER_FLASH_PAGE << 16) | (long)(addr))
+#else
+#   define USB_READ_FLASH(addr)    pgm_read_byte(addr)
+#endif
 
 #define macro   .macro
 #define endm    .endm
@@ -138,4 +141,3 @@ static inline void  sei(void)
 #   define PRG_RDB(addr)    USB_READ_FLASH(addr)
 #endif
 #endif  /* __usbportability_h_INCLUDED__ */
-
